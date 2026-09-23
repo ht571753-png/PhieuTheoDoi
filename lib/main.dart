@@ -119,7 +119,117 @@ class DatabaseHelper {
   }
 }
 
-// ==================== 2. MÀN HÌNH DANH SÁCH HỒ SƠ ====================
+// ==================== HÀM XUẤT IN HTML / PDF ====================
+Future<void> exportHtmlPrint(BuildContext context, Map<String, dynamic> item) async {
+  final name = (item['full_name'] ?? '').toString().toUpperCase();
+  final shspn = item['shspn'] ?? '';
+
+  final htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PHIẾU THEO DÕI QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ</title>
+<style>
+  @page { size: portrait; margin: 12mm; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 13px; line-height: 1.5; color: #000; }
+  .center { text-align: center; }
+  .header-tbl { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .header-tbl td { border: none; padding: 2px; }
+  .title { font-size: 15px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
+  .section { font-weight: bold; margin-top: 14px; text-transform: uppercase; font-size: 13.5px; border-bottom: 1px solid #000; padding-bottom: 2px; }
+  .item { margin-top: 4px; }
+</style>
+</head>
+<body onload="window.print()">
+  <table class="header-tbl">
+    <tr>
+      <td style="width: 50%;" class="center">
+        CỤC C10<br><b>TRẠI GIAM THỦ ĐỨC</b>
+      </td>
+      <td style="width: 50%;" class="center">
+        <b>Mẫu PT78BH theo TT số 74/2026/TT-BCA</b><br>Ngày 01/06/2026
+      </td>
+    </tr>
+  </table>
+
+  <div class="title">PHIẾU THEO DÕI<br>QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ CỦA PHẠM NHÂN</div>
+  <div class="center" style="margin-bottom: 15px;">SHSPN: <b>$shspn</b></div>
+
+  <div class="section">I. SƠ LƯỢC LÝ LỊCH</div>
+  <div class="item">- Họ và tên: <b>$name</b>; Tên gọi khác: ${item['alias_name'] ?? ''}</div>
+  <div class="item">- Ngày sinh: ${item['dob'] ?? ''}; Quê quán: ${item['hometown'] ?? ''}</div>
+  <div class="item">- Nơi thường trú: ${item['residence'] ?? ''}</div>
+  <div class="item">- Số CCCD/Hộ chiếu: ${item['cccd'] ?? ''}; Ngày cấp: ${item['cccd_date'] ?? ''}; Nơi cấp: ${item['cccd_place'] ?? ''}</div>
+  <div class="item">- Dân tộc: ${item['ethnicity'] ?? ''}; Quốc tịch: ${item['nationality'] ?? 'Việt Nam'}; Tôn giáo: ${item['religion'] ?? 'Không'}; Trình độ: ${item['education'] ?? ''}</div>
+  <div class="item">- Tội danh: <b>${item['crime'] ?? ''}</b></div>
+  <div class="item">- Ngày bắt: ${item['arrest_date'] ?? ''}; Án phạt: <b>${item['sentence'] ?? ''}</b>; Ngày đến trại: ${item['arrival_date'] ?? ''}</div>
+  <div class="item">- Bản án số: ${item['judgment_no'] ?? ''} của TAND ${item['judgment_court'] ?? ''}</div>
+  <div class="item">- Quyết định THA số: ${item['judgment_tha_no'] ?? ''} của TAND ${item['judgment_tha_court'] ?? ''}</div>
+  <div class="item">- Thời gian tạm giữ, tạm giam: ${item['detention_time'] ?? ''}</div>
+  <div class="item">- Vi phạm trong thời gian tạm giữ, tạm giam: ${item['crime_during_detention'] ?? 'Không'}</div>
+  <div class="item">- Bắt buộc chữa bệnh: ${item['medical_treatment_time'] ?? 'Không'}; Vi phạm khi chữa bệnh: ${item['escape_during_treatment'] ?? 'Không'}</div>
+  <div class="item">- Tiền án: ${item['prior_conviction'] ?? 'Không'}</div>
+  <div class="item">- Tiền sự: ${item['prior_offense'] ?? 'Không'}</div>
+  <div class="item">- Tiền sử ma túy: ${item['drug_history'] ?? 'Không'}; Tiền sử bệnh tật: ${item['medical_history'] ?? 'Bình thường'}</div>
+  <div class="item">- Trốn trại: ${item['escape_prison'] ?? 'Không'}; Bắt lại: ${item['recaptured_info'] ?? 'Không'}</div>
+  
+  <div class="item" style="font-weight:bold; margin-top:6px;">* Hình phạt bổ sung & nghĩa vụ dân sự:</div>
+  <div>+ Phạt tiền: ${item['fine_penalty'] ?? ''} (Tình trạng: ${item['fine_status'] ?? ''})</div>
+  <div>+ Bồi thường thiệt hại: ${item['compensation'] ?? ''} (Tình trạng: ${item['compensation_status'] ?? ''})</div>
+  <div>+ Trả lại tài sản: ${item['return_property'] ?? ''} (Tình trạng: ${item['return_property_status'] ?? ''})</div>
+  <div>+ Án phí HS: ${item['court_fee_criminal'] ?? ''} (Tình trạng: ${item['court_fee_criminal_status'] ?? ''}); Án phí DS: ${item['court_fee_civil'] ?? ''} (Tình trạng: ${item['court_fee_civil_status'] ?? ''})</div>
+
+  <div class="section">II. TÓM TẮT HÀNH VI PHẠM TỘI</div>
+  <div class="item" style="text-align: justify;">${item['crime_summary'] ?? 'Đang cập nhật...'}</div>
+
+  <div class="section">III. QUAN HỆ GIA ĐÌNH</div>
+  <div class="item">1. Bố: ${item['father_info'] ?? ''}</div>
+  <div class="item">2. Mẹ: ${item['mother_info'] ?? ''}</div>
+  <div class="item">3. Vợ / Chồng: ${item['spouse_info'] ?? ''}</div>
+  <div class="item">4. Các con: ${item['children_info'] ?? ''}</div>
+  <div class="item">5. Anh, chị em ruột: ${item['siblings_info'] ?? ''}</div>
+  <div class="item">6. Con nuôi, bố mẹ nuôi: ${item['adoptive_info'] ?? 'Không có'}</div>
+
+  <div class="section">IV. QUAN HỆ XÃ HỘI</div>
+  <div class="item" style="text-align: justify;">${item['social_relations'] ?? 'Chưa phát hiện quan hệ phức tạp.'}</div>
+
+  <div class="section">V. QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ</div>
+  <div class="item">- <b>1. Xếp loại chấp hành án:</b><br>${item['ratings_summary'] ?? ''}</div>
+  <div class="item">- <b>2. Giảm thời hạn tù:</b><br>${item['reduced_records'] ?? 'Chưa'}</div>
+  <div class="item">- <b>3. Tạm đình chỉ:</b> ${item['temporary_suspension'] ?? 'Không'}</div>
+  <div class="item">- <b>4. Tha tù trước thời hạn có ĐK:</b> ${item['conditional_release'] ?? 'Không'}</div>
+  <div class="item">- <b>5. Khen thưởng:</b> ${item['rewards'] ?? 'Chưa'}</div>
+  <div class="item">- <b>6. Kỷ luật:</b> ${item['disciplines'] ?? 'Không'}</div>
+  <div class="item">- <b>7. Giam riêng:</b> ${item['solitary_confinement'] ?? 'Không'}</div>
+  <div class="item">- <b>8. Phạm tội mới trong trại:</b> ${item['new_crime'] ?? 'Không'}</div>
+  <div class="item">- <b>9. Phân loại quản chế:</b> ${item['probation_classification'] ?? ''}</div>
+  <div class="item">- <b>10. Trích xuất:</b> ${item['extract_records'] ?? 'Không'}</div>
+  <div class="item">- <b>11. Chuyển đội/phân trại:</b> ${item['transfer_records'] ?? ''}</div>
+  <div class="item">- <b>12. Nhận xét trước khi chuyển giao:</b> ${item['transfer_evaluation'] ?? ''}</div>
+  <div class="item">- <b>13. Thông tin khác:</b> ${item['other_info'] ?? ''}</div>
+
+  <div class="section">VI. CÁN BỘ QUẢN GIÁO PHỤ TRÁCH TỔ, ĐỘI</div>
+  <div class="item">${item['officers_in_charge'] ?? ''}</div>
+</body>
+</html>
+''';
+
+  try {
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/Phieu_PT78BH_${shspn.isNotEmpty ? shspn : item['id']}.html');
+    await file.writeAsString(htmlContent);
+
+    await Share.shareXFiles(
+      [XFile(file.path, mimeType: 'text/html')],
+      text: 'Phiếu theo dõi phạm nhân $name (Mở bằng Chrome để In / Lưu PDF)',
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi xuất bản in: $e')));
+  }
+}
+
+// ==================== 2. MÀN HÌNH DANH SÁCH ====================
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MaterialApp(
@@ -176,123 +286,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Chạm vào thẻ -> Mở xem chi tiết (Chỉ đọc)
+  void _openViewScreen(Map<String, dynamic> item) async {
+    final res = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProfileViewDetailScreen(profile: item)),
+    );
+    if (res == true) _loadData();
+  }
+
+  // Mở màn hình chỉnh sửa
   void _openEditScreen(Map<String, dynamic>? item) async {
     final res = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => FullProfileEditScreen(profile: item)),
     );
     if (res == true) _loadData();
-  }
-
-  Future<void> _exportHtmlPrint(Map<String, dynamic> item) async {
-    final name = (item['full_name'] ?? '').toString().toUpperCase();
-    final shspn = item['shspn'] ?? '';
-
-    final htmlContent = '''
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>PHIẾU THEO DÕI QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ CỦA PHẠM NHÂN</title>
-<style>
-  @page { size: portrait; margin: 12mm; }
-  body { font-family: "Times New Roman", Times, serif; font-size: 13px; line-height: 1.5; color: #000; }
-  .center { text-align: center; }
-  .bold { font-weight: bold; }
-  .header-tbl { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  .header-tbl td { border: none; padding: 2px; }
-  .title { font-size: 15px; font-weight: bold; text-align: center; margin: 15px 0 5px 0; }
-  .section { font-weight: bold; margin-top: 14px; text-transform: uppercase; font-size: 13.5px; border-bottom: 1px solid #000; padding-bottom: 2px; }
-  .item { margin-top: 4px; }
-</style>
-</head>
-<body onload="window.print()">
-  <table class="header-tbl">
-    <tr>
-      <td style="width: 50%;" class="center">
-        CỤC C10<br><b>TRẠI GIAM THỦ ĐỨC</b>
-      </td>
-      <td style="width: 50%;" class="center">
-        <b>Mẫu PT78BH theo TT số 74/2026/TT-BCA</b><br>Ngày 01/06/2026
-      </td>
-    </tr>
-  </table>
-
-  <div class="title">PHIẾU THEO DÕI<br>QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ CỦA PHẠM NHÂN</div>
-  <div class="center" style="margin-bottom: 15px;">SHSPN: <b>$shspn</b></div>
-
-  <div class="section">I. SƠ LƯỢC LÝ LỊCH</div>
-  <div class="item">- Họ và tên: <b>$name</b>; Tên gọi khác: ${item['alias_name'] ?? ''}</div>
-  <div class="item">- Ngày sinh: ${item['dob'] ?? ''}; Quê quán: ${item['hometown'] ?? ''}</div>
-  <div class="item">- Nơi thường trú: ${item['residence'] ?? ''}</div>
-  <div class="item">- Số CCCD/Hộ chiếu: ${item['cccd'] ?? ''}; Ngày cấp: ${item['cccd_date'] ?? ''}; Nơi cấp: ${item['cccd_place'] ?? ''}</div>
-  <div class="item">- Dân tộc: ${item['ethnicity'] ?? ''}; Quốc tịch: ${item['nationality'] ?? 'Việt Nam'}; Tôn giáo: ${item['religion'] ?? 'Không'}; Trình độ: ${item['education'] ?? ''}</div>
-  <div class="item">- Tội danh: <b>${item['crime'] ?? ''}</b></div>
-  <div class="item">- Ngày bắt: ${item['arrest_date'] ?? ''}; Án phạt: <b>${item['sentence'] ?? ''}</b>; Ngày đến trại: ${item['arrival_date'] ?? ''}</div>
-  <div class="item">- Bản án số: ${item['judgment_no'] ?? ''} của TAND ${item['judgment_court'] ?? ''}</div>
-  <div class="item">- Quyết định THA số: ${item['judgment_tha_no'] ?? ''} của TAND ${item['judgment_tha_court'] ?? ''}</div>
-  <div class="item">- Thời gian tạm giữ, tạm giam: ${item['detention_time'] ?? ''}</div>
-  <div class="item">- Vi phạm trong thời gian tạm giữ, tạm giam: ${item['crime_during_detention'] ?? 'Không'}</div>
-  <div class="item">- Bắt buộc chữa bệnh: ${item['medical_treatment_time'] ?? 'Không'}; Vi phạm khi chữa bệnh: ${item['escape_during_treatment'] ?? 'Không'}</div>
-  <div class="item">- Tiền án: ${item['prior_conviction'] ?? 'Không'}</div>
-  <div class="item">- Tiền sự: ${item['prior_offense'] ?? 'Không'}</div>
-  <div class="item">- Tiền sử ma túy: ${item['drug_history'] ?? 'Không'}; Tiền sử bệnh tật: ${item['medical_history'] ?? 'Bình thường'}</div>
-  <div class="item">- Trốn trại: ${item['escape_prison'] ?? 'Không'}; Bắt lại (đầu thú): ${item['recaptured_info'] ?? 'Không'}</div>
-  
-  <div class="item" style="font-weight:bold; margin-top:6px;">* Hình phạt bổ sung & nghĩa vụ dân sự:</div>
-  <div>+ Phạt tiền: ${item['fine_penalty'] ?? ''} (Đã: ${item['fine_status'] ?? ''})</div>
-  <div>+ Bồi thường thiệt hại: ${item['compensation'] ?? ''} (Đã: ${item['compensation_status'] ?? ''})</div>
-  <div>+ Nghĩa vụ trả lại tài sản: ${item['return_property'] ?? ''} (Đã: ${item['return_property_status'] ?? ''})</div>
-  <div>+ Án phí HS: ${item['court_fee_criminal'] ?? ''} (Đã: ${item['court_fee_criminal_status'] ?? ''}); Án phí DS: ${item['court_fee_civil'] ?? ''} (Đã: ${item['court_fee_civil_status'] ?? ''})</div>
-
-  <div class="section">II. TÓM TẮT HÀNH VI PHẠM TỘI</div>
-  <div class="item" style="text-align: justify;">${item['crime_summary'] ?? 'Đang cập nhật...'}</div>
-
-  <div class="section">III. QUAN HỆ GIA ĐÌNH</div>
-  <div class="item">1. Bố: ${item['father_info'] ?? ''}</div>
-  <div class="item">2. Mẹ: ${item['mother_info'] ?? ''}</div>
-  <div class="item">3. Vợ / Chồng: ${item['spouse_info'] ?? ''}</div>
-  <div class="item">4. Các con: ${item['children_info'] ?? ''}</div>
-  <div class="item">5. Anh, chị em ruột: ${item['siblings_info'] ?? ''}</div>
-  <div class="item">6. Con nuôi, bố mẹ nuôi: ${item['adoptive_info'] ?? 'Không có'}</div>
-
-  <div class="section">IV. QUAN HỆ XÃ HỘI</div>
-  <div class="item" style="text-align: justify;">${item['social_relations'] ?? 'Chưa phát hiện quan hệ phức tạp ngoài xã hội.'}</div>
-
-  <div class="section">V. QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ</div>
-  <div class="item">- <b>1. Xếp loại chấp hành án:</b><br>${item['ratings_summary'] ?? ''}</div>
-  <div class="item">- <b>2. Giảm thời hạn tù:</b><br>${item['reduced_records'] ?? 'Chưa'}</div>
-  <div class="item">- <b>3. Tạm đình chỉ:</b> ${item['temporary_suspension'] ?? 'Không'}</div>
-  <div class="item">- <b>4. Tha tù trước thời hạn có ĐK:</b> ${item['conditional_release'] ?? 'Không'}</div>
-  <div class="item">- <b>5. Khen thưởng:</b> ${item['rewards'] ?? 'Chưa'}</div>
-  <div class="item">- <b>6. Kỷ luật:</b> ${item['disciplines'] ?? 'Không'}</div>
-  <div class="item">- <b>7. Giam riêng:</b> ${item['solitary_confinement'] ?? 'Không'}</div>
-  <div class="item">- <b>8. Phạm tội mới trong trại:</b> ${item['new_crime'] ?? 'Không'}</div>
-  <div class="item">- <b>9. Phân loại quản chế:</b> ${item['probation_classification'] ?? ''}</div>
-  <div class="item">- <b>10. Trích xuất:</b> ${item['extract_records'] ?? 'Không'}</div>
-  <div class="item">- <b>11. Chuyển đội/phân trại:</b> ${item['transfer_records'] ?? ''}</div>
-  <div class="item">- <b>12. Nhận xét trước khi chuyển giao:</b> ${item['transfer_evaluation'] ?? ''}</div>
-  <div class="item">- <b>13. Thông tin khác:</b> ${item['other_info'] ?? ''}</div>
-
-  <div class="section">VI. CÁN BỘ QUẢN GIÁO PHỤ TRÁCH TỔ, ĐỘI</div>
-  <div class="item">${item['officers_in_charge'] ?? ''}</div>
-</body>
-</html>
-''';
-
-    try {
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/Phieu_PT78BH_${shspn.isNotEmpty ? shspn : item['id']}.html');
-      await file.writeAsString(htmlContent);
-
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'text/html')],
-        text: 'Phiếu theo dõi phạm nhân $name (Mở bằng Chrome để In hoặc Lưu PDF)',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi xuất bản in: $e')));
-    }
   }
 
   @override
@@ -329,36 +338,59 @@ class _HomeScreenState extends State<HomeScreen> {
                           final item = _filtered[index];
                           return Card(
                             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.blueGrey[800],
-                                child: Text('${index + 1}', style: const TextStyle(color: Colors.white)),
-                              ),
-                              title: Text((item['full_name'] ?? '').toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey)),
-                              subtitle: Text(
-                                'SHSPN: ${item['shspn'] ?? '-'} | Ngày sinh: ${item['dob'] ?? '-'}\nCan tội: ${item['crime'] ?? '-'}\nÁn phạt: ${item['sentence'] ?? '-'}',
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.print, color: Colors.indigo),
-                                    tooltip: 'In phiếu PT78BH',
-                                    onPressed: () => _exportHtmlPrint(item),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () => _openEditScreen(item),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () async {
-                                      await DatabaseHelper.instance.deleteProfile(item['id']);
-                                      _loadData();
-                                    },
-                                  ),
-                                ],
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              // CHẠM VÀO LÀ MỞ XEM CHI TIẾT NGAY
+                              onTap: () => _openViewScreen(item),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: Colors.blueGrey[800],
+                                      child: Text('${index + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            (item['full_name'] ?? '').toString().toUpperCase(),
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blueGrey),
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text('SHSPN: ${item['shspn'] ?? '-'} | Ngày sinh: ${item['dob'] ?? '-'}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
+                                          Text('Can tội: ${item['crime'] ?? '-'}', style: const TextStyle(fontSize: 12, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                          Text('Án phạt: ${item['sentence'] ?? '-'}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.print, color: Colors.indigo),
+                                          tooltip: 'In phiếu PT78BH',
+                                          onPressed: () => exportHtmlPrint(context, item),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit, color: Colors.blue),
+                                          tooltip: 'Chỉnh sửa',
+                                          onPressed: () => _openEditScreen(item),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                          tooltip: 'Xóa hồ sơ',
+                                          onPressed: () async {
+                                            await DatabaseHelper.instance.deleteProfile(item['id']);
+                                            _loadData();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -377,7 +409,204 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ==================== 3. BIỂU MẪU ĐẦY ĐỦ 5 MỤC LỚN & CÁC MỤC NHỎ ====================
+// ==================== 3. MÀN HÌNH XEM CHI TIẾT (CHỈ ĐỌC - READ ONLY) ====================
+class ProfileViewDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> profile;
+  const ProfileViewDetailScreen({Key? key, required this.profile}) : super(key: key);
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      margin: const EdgeInsets.only(top: 14, bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: Colors.blueGrey[100], borderRadius: BorderRadius.circular(6)),
+      child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: Colors.blueGrey[900])),
+    );
+  }
+
+  Widget _buildRowItem(String label, dynamic value) {
+    final textVal = (value ?? '').toString().trim();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 135,
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87)),
+          ),
+          Expanded(
+            child: Text(textVal.isEmpty ? '-' : textVal, style: const TextStyle(fontSize: 13, color: Colors.black)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = profile;
+    final name = (item['full_name'] ?? '').toString().toUpperCase();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('HỒ SƠ: $name', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blueGrey[900],
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.print),
+            tooltip: 'In phiếu PT78BH',
+            onPressed: () => exportHtmlPrint(context, item),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Chỉnh sửa hồ sơ',
+            onPressed: () async {
+              final res = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FullProfileEditScreen(profile: item)),
+              );
+              if (res == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(14),
+        children: [
+          // Khung thông tin nhanh
+          Card(
+            color: Colors.blueGrey[50],
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey[900])),
+                  const SizedBox(height: 4),
+                  Text('SHSPN: ${item['shspn'] ?? '-'} | Ngày sinh: ${item['dob'] ?? '-'}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text('Tội danh: ${item['crime'] ?? '-'}'),
+                  Text('Án phạt: ${item['sentence'] ?? '-'} | Ngày bắt: ${item['arrest_date'] ?? '-'}'),
+                ],
+              ),
+            ),
+          ),
+
+          _buildSectionHeader('I. SƠ LƯỢC LÝ LỊCH'),
+          _buildRowItem('Họ và tên khác', item['alias_name']),
+          _buildRowItem('Quê quán', item['hometown']),
+          _buildRowItem('Nơi thường trú', item['residence']),
+          _buildRowItem('Số CCCD/Hộ chiếu', item['cccd']),
+          _buildRowItem('Ngày cấp CCCD', item['cccd_date']),
+          _buildRowItem('Nơi cấp CCCD', item['cccd_place']),
+          _buildRowItem('Dân tộc', item['ethnicity']),
+          _buildRowItem('Quốc tịch', item['nationality']),
+          _buildRowItem('Tôn giáo', item['religion']),
+          _buildRowItem('Trình độ học vấn', item['education']),
+          _buildRowItem('Ngày đến trại', item['arrival_date']),
+          _buildRowItem('Bản án số', item['judgment_no']),
+          _buildRowItem('TAND xét xử', item['judgment_court']),
+          _buildRowItem('QĐ THA số', item['judgment_tha_no']),
+          _buildRowItem('TAND ra QĐ THA', item['judgment_tha_court']),
+          _buildRowItem('Thời gian tạm giữ/giam', item['detention_time']),
+          _buildRowItem('Vi phạm khi tạm giam', item['crime_during_detention']),
+          _buildRowItem('Bắt buộc chữa bệnh', item['medical_treatment_time']),
+          _buildRowItem('Vi phạm khi chữa bệnh', item['escape_during_treatment']),
+          _buildRowItem('Tiền án', item['prior_conviction']),
+          _buildRowItem('Tiền sự', item['prior_offense']),
+          _buildRowItem('Tiền sử ma túy', item['drug_history']),
+          _buildRowItem('Tiền sử bệnh tật', item['medical_history']),
+          _buildRowItem('Trốn trại giam', item['escape_prison']),
+          _buildRowItem('Bắt lại (đầu thú)', item['recaptured_info']),
+
+          _buildSectionHeader('HÌNH PHẠT BỔ SUNG & NGHĨA VỤ DÂN SỰ'),
+          _buildRowItem('Phạt tiền', '${item['fine_penalty'] ?? ''} (Tình trạng: ${item['fine_status'] ?? ''})'),
+          _buildRowItem('Bồi thường thiệt hại', '${item['compensation'] ?? ''} (Tình trạng: ${item['compensation_status'] ?? ''})'),
+          _buildRowItem('Trả lại tài sản', '${item['return_property'] ?? ''} (Tình trạng: ${item['return_property_status'] ?? ''})'),
+          _buildRowItem('Án phí hình sự', '${item['court_fee_criminal'] ?? ''} (Tình trạng: ${item['court_fee_criminal_status'] ?? ''})'),
+          _buildRowItem('Án phí dân sự', '${item['court_fee_civil'] ?? ''} (Tình trạng: ${item['court_fee_civil_status'] ?? ''})'),
+          _buildRowItem('Hình phạt khác', item['other_supplementary_penalty']),
+
+          _buildSectionHeader('II. TÓM TẮT HÀNH VI PHẠM TỘI'),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              (item['crime_summary'] ?? '').toString().trim().isEmpty ? 'Chưa cập nhật.' : item['crime_summary']!,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+              textAlign: TextAlign.justify,
+            ),
+          ),
+
+          _buildSectionHeader('III. QUAN HỆ GIA ĐÌNH'),
+          _buildRowItem('1. Họ tên Bố', item['father_info']),
+          _buildRowItem('2. Họ tên Mẹ', item['mother_info']),
+          _buildRowItem('3. Vợ / Chồng', item['spouse_info']),
+          _buildRowItem('4. Các con', item['children_info']),
+          _buildRowItem('5. Anh chị em ruột', item['siblings_info']),
+          _buildRowItem('6. Bố mẹ / Con nuôi', item['adoptive_info']),
+
+          _buildSectionHeader('IV. QUAN HỆ XÃ HỘI'),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              (item['social_relations'] ?? '').toString().trim().isEmpty ? 'Chưa ghi nhận quan hệ phức tạp.' : item['social_relations']!,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+
+          _buildSectionHeader('V. QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ (1-13)'),
+          _buildRowItem('1. Xếp loại chấp hành', item['ratings_summary']),
+          _buildRowItem('2. Giảm thời hạn tù', item['reduced_records']),
+          _buildRowItem('3. Tạm đình chỉ', item['temporary_suspension']),
+          _buildRowItem('4. Tha tù trước hạn (ĐK)', item['conditional_release']),
+          _buildRowItem('5. Khen thưởng', item['rewards']),
+          _buildRowItem('6. Kỷ luật', item['disciplines']),
+          _buildRowItem('7. Giam riêng', item['solitary_confinement']),
+          _buildRowItem('8. Phạm tội mới trong trại', item['new_crime']),
+          _buildRowItem('9. Phân loại quản chế', item['probation_classification']),
+          _buildRowItem('10. Trích xuất', item['extract_records']),
+          _buildRowItem('11. Chuyển đội / Phân trại', item['transfer_records']),
+          _buildRowItem('12. Đánh giá trước chuyển', item['transfer_evaluation']),
+          _buildRowItem('13. Thông tin khác', item['other_info']),
+
+          _buildSectionHeader('VI. CÁN BỘ QUẢN GIÁO PHỤ TRÁCH TỔ, ĐỘI'),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Text(
+              (item['officers_in_charge'] ?? '').toString().trim().isEmpty ? 'Chưa cập nhật.' : item['officers_in_charge']!,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+
+          const SizedBox(height: 25),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final res = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FullProfileEditScreen(profile: item)),
+              );
+              if (res == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('CHỈNH SỬA TOÀN BỘ HỒ SƠ', style: TextStyle(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueGrey[900],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+// ==================== 4. BIỂU MẪU CHỈNH SỬA TOÀN BỘ (TỪNG TAB) ====================
 class FullProfileEditScreen extends StatefulWidget {
   final Map<String, dynamic>? profile;
   const FullProfileEditScreen({Key? key, this.profile}) : super(key: key);
@@ -390,7 +619,6 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
   final _formKey = GlobalKey<FormState>();
   late TabController _tabController;
 
-  // I. Sơ lược lý lịch
   final _shspnCtl = TextEditingController();
   final _nameCtl = TextEditingController();
   final _aliasCtl = TextEditingController();
@@ -423,7 +651,6 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
   final _escapePrisonCtl = TextEditingController();
   final _recapturedInfoCtl = TextEditingController();
 
-  // Nghĩa vụ dân sự & hình phạt bổ sung
   final _finePenaltyCtl = TextEditingController();
   final _fineStatusCtl = TextEditingController();
   final _compensationCtl = TextEditingController();
@@ -438,10 +665,8 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
   final _courtFeeCivilStatusCtl = TextEditingController();
   final _otherSupplementaryPenaltyCtl = TextEditingController();
 
-  // II. Hành vi phạm tội
   final _crimeSummaryCtl = TextEditingController();
 
-  // III. Quan hệ gia đình
   final _fatherCtl = TextEditingController();
   final _motherCtl = TextEditingController();
   final _spouseCtl = TextEditingController();
@@ -449,10 +674,8 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
   final _siblingsCtl = TextEditingController();
   final _adoptiveCtl = TextEditingController();
 
-  // IV. Quan hệ xã hội
   final _socialRelationsCtl = TextEditingController();
 
-  // V. Quá trình chấp hành án phạt tù (13 mục nhỏ)
   final _ratingsSummaryCtl = TextEditingController();
   final _reducedRecordsCtl = TextEditingController();
   final _temporarySuspensionCtl = TextEditingController();
@@ -467,7 +690,6 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
   final _transferEvaluationCtl = TextEditingController();
   final _otherInfoCtl = TextEditingController();
 
-  // VI. Cán bộ quản giáo phụ trách
   final _officersInChargeCtl = TextEditingController();
 
   @override
@@ -650,7 +872,7 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
             Tab(text: 'II. Hành Vi'),
             Tab(text: 'III. Gia Đình'),
             Tab(text: 'IV. Xã Hội'),
-            Tab(text: 'V. Quá Trình Thi Hành Án (1-13)'),
+            Tab(text: 'V. Quá Trình Thi Hành Án'),
             Tab(text: 'VI. Cán Bộ'),
           ],
         ),
@@ -660,7 +882,7 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
         child: TabBarView(
           controller: _tabController,
           children: [
-            // TAB 1: I. Sơ lược lý lịch
+            // TAB 1
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
@@ -730,21 +952,21 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
                 const SizedBox(height: 8),
                 TextFormField(controller: _detentionTimeCtl, decoration: const InputDecoration(labelText: 'Thời gian tạm giữ, tạm giam', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
-                TextFormField(controller: _crimeDuringDetentionCtl, decoration: const InputDecoration(labelText: 'Hành vi vi phạm trong thời gian tạm giữ, tạm giam', border: OutlineInputBorder())),
+                TextFormField(controller: _crimeDuringDetentionCtl, decoration: const InputDecoration(labelText: 'Vi phạm trong khi tạm giữ, tạm giam', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
                 TextFormField(controller: _medicalTreatmentTimeCtl, decoration: const InputDecoration(labelText: 'Thời gian bắt buộc chữa bệnh', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
                 TextFormField(controller: _escapeDuringTreatmentCtl, decoration: const InputDecoration(labelText: 'Bỏ trốn / vi phạm khi chữa bệnh', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
-                TextFormField(controller: _priorConvictionCtl, decoration: const InputDecoration(labelText: 'Tiền án (ghi rõ từng lần, tội danh, trại giam)', border: OutlineInputBorder()), maxLines: 2),
+                TextFormField(controller: _priorConvictionCtl, decoration: const InputDecoration(labelText: 'Tiền án (ghi rõ từng lần)', border: OutlineInputBorder()), maxLines: 2),
                 const SizedBox(height: 8),
-                TextFormField(controller: _priorOffenseCtl, decoration: const InputDecoration(labelText: 'Tiền sự (bao nhiêu lần, hành vi)', border: OutlineInputBorder()), maxLines: 2),
+                TextFormField(controller: _priorOffenseCtl, decoration: const InputDecoration(labelText: 'Tiền sự (ghi rõ từng lần)', border: OutlineInputBorder()), maxLines: 2),
                 const SizedBox(height: 8),
                 TextFormField(controller: _drugHistoryCtl, decoration: const InputDecoration(labelText: 'Tiền sử sử dụng ma túy', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
                 TextFormField(controller: _medicalHistoryCtl, decoration: const InputDecoration(labelText: 'Tiền sử bệnh tật', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
-                TextFormField(controller: _escapePrisonCtl, decoration: const InputDecoration(labelText: 'Trốn trại giam, trại tạm giam', border: OutlineInputBorder())),
+                TextFormField(controller: _escapePrisonCtl, decoration: const InputDecoration(labelText: 'Trốn trại giam', border: OutlineInputBorder())),
                 const SizedBox(height: 8),
                 TextFormField(controller: _recapturedInfoCtl, decoration: const InputDecoration(labelText: 'Bắt lại (đầu thú)', border: OutlineInputBorder())),
 
@@ -755,7 +977,7 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
                   children: [
                     Expanded(child: TextFormField(controller: _finePenaltyCtl, decoration: const InputDecoration(labelText: 'Phạt tiền', border: OutlineInputBorder()))),
                     const SizedBox(width: 6),
-                    Expanded(child: TextFormField(controller: _fineStatusCtl, decoration: const InputDecoration(labelText: 'Đã / Chưa thực hiện', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _fineStatusCtl, decoration: const InputDecoration(labelText: 'Đã/Chưa thực hiện', border: OutlineInputBorder()))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -763,246 +985,119 @@ class _FullProfileEditScreenState extends State<FullProfileEditScreen> with Sing
                   children: [
                     Expanded(child: TextFormField(controller: _compensationCtl, decoration: const InputDecoration(labelText: 'Bồi thường thiệt hại', border: OutlineInputBorder()))),
                     const SizedBox(width: 6),
-                    Expanded(child: TextFormField(controller: _compensationStatusCtl, decoration: const InputDecoration(labelText: 'Đã / Chưa thực hiện', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _compensationStatusCtl, decoration: const InputDecoration(labelText: 'Đã/Chưa thực hiện', border: OutlineInputBorder()))),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: TextFormField(controller: _returnPropertyCtl, decoration: const InputDecoration(labelText: 'Nghĩa vụ trả lại tài sản', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _returnPropertyCtl, decoration: const InputDecoration(labelText: 'Trả lại tài sản', border: OutlineInputBorder()))),
                     const SizedBox(width: 6),
-                    Expanded(child: TextFormField(controller: _returnPropertyStatusCtl, decoration: const InputDecoration(labelText: 'Đã / Chưa thực hiện', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _returnPropertyStatusCtl, decoration: const InputDecoration(labelText: 'Đã/Chưa thực hiện', border: OutlineInputBorder()))),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: TextFormField(controller: _courtFeeCriminalCtl, decoration: const InputDecoration(labelText: 'Án phí hình sự', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _courtFeeCriminalCtl, decoration: const InputDecoration(labelText: 'Án phí HS', border: OutlineInputBorder()))),
                     const SizedBox(width: 6),
-                    Expanded(child: TextFormField(controller: _courtFeeCriminalStatusCtl, decoration: const InputDecoration(labelText: 'Đã / Chưa thực hiện', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _courtFeeCriminalStatusCtl, decoration: const InputDecoration(labelText: 'Đã/Chưa thực hiện', border: OutlineInputBorder()))),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: TextFormField(controller: _courtFeeCivilCtl, decoration: const InputDecoration(labelText: 'Án phí dân sự', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _courtFeeCivilCtl, decoration: const InputDecoration(labelText: 'Án phí DS', border: OutlineInputBorder()))),
                     const SizedBox(width: 6),
-                    Expanded(child: TextFormField(controller: _courtFeeCivilStatusCtl, decoration: const InputDecoration(labelText: 'Đã / Chưa thực hiện', border: OutlineInputBorder()))),
+                    Expanded(child: TextFormField(controller: _courtFeeCivilStatusCtl, decoration: const InputDecoration(labelText: 'Đã/Chưa thực hiện', border: OutlineInputBorder()))),
                   ],
                 ),
                 const SizedBox(height: 8),
-                TextFormField(controller: _otherSupplementaryPenaltyCtl, decoration: const InputDecoration(labelText: 'Hình phạt bổ sung khác (nếu có)', border: OutlineInputBorder())),
+                TextFormField(controller: _otherSupplementaryPenaltyCtl, decoration: const InputDecoration(labelText: 'Hình phạt bổ sung khác', border: OutlineInputBorder())),
               ],
             ),
 
-            // TAB 2: II. Tóm tắt hành vi phạm tội
+            // TAB 2
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
-                const Text('TÓM TẮT HÀNH VI PHẠM TỘI (Ghi rõ diễn biến hành vi phạm tội theo bản án):', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('TÓM TẮT HÀNH VI PHẠM TỘI (Theo bản án):', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
-                TextFormField(
-                  controller: _crimeSummaryCtl,
-                  maxLines: 15,
-                  decoration: const InputDecoration(
-                    hintText: 'Nhập nội dung tóm tắt hành vi phạm tội...',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextFormField(controller: _crimeSummaryCtl, maxLines: 15, decoration: const InputDecoration(border: OutlineInputBorder())),
               ],
             ),
 
-            // TAB 3: III. Quan hệ gia đình
+            // TAB 3
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
                 const Text('THÔNG TIN GIA ĐÌNH:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                TextFormField(controller: _fatherCtl, maxLines: 2, decoration: const InputDecoration(labelText: '1. Họ tên Bố (Năm sinh, quê quán, nơi ĐKTT, chỗ ở, nghề nghiệp)', border: OutlineInputBorder())),
-                const SizedBox(height: 10),
-                TextFormField(controller: _motherCtl, maxLines: 2, decoration: const InputDecoration(labelText: '2. Họ tên Mẹ (Năm sinh, quê quán, nơi ĐKTT, chỗ ở, nghề nghiệp)', border: OutlineInputBorder())),
-                const SizedBox(height: 10),
-                TextFormField(controller: _spouseCtl, maxLines: 2, decoration: const InputDecoration(labelText: '3. Họ tên Vợ / Chồng (Năm sinh, nơi ĐKTT, chỗ ở, nghề nghiệp)', border: OutlineInputBorder())),
-                const SizedBox(height: 10),
-                TextFormField(controller: _childrenCtl, maxLines: 3, decoration: const InputDecoration(labelText: '4. Các con (Ghi rõ họ tên, năm sinh, địa chỉ, nghề nghiệp từng con)', border: OutlineInputBorder())),
-                const SizedBox(height: 10),
-                TextFormField(controller: _siblingsCtl, maxLines: 3, decoration: const InputDecoration(labelText: '5. Anh, chị em ruột (Họ tên, năm sinh, nơi cư trú, nghề nghiệp)', border: OutlineInputBorder())),
-                const SizedBox(height: 10),
-                TextFormField(controller: _adoptiveCtl, maxLines: 2, decoration: const InputDecoration(labelText: '6. Bố nuôi, mẹ nuôi, con nuôi hợp pháp (nếu có)', border: OutlineInputBorder())),
+                TextFormField(controller: _fatherCtl, maxLines: 2, decoration: const InputDecoration(labelText: '1. Họ tên Bố', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _motherCtl, maxLines: 2, decoration: const InputDecoration(labelText: '2. Họ tên Mẹ', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _spouseCtl, maxLines: 2, decoration: const InputDecoration(labelText: '3. Họ tên Vợ/Chồng', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _childrenCtl, maxLines: 3, decoration: const InputDecoration(labelText: '4. Các con', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _siblingsCtl, maxLines: 3, decoration: const InputDecoration(labelText: '5. Anh chị em ruột', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _adoptiveCtl, maxLines: 2, decoration: const InputDecoration(labelText: '6. Con nuôi / Bố mẹ nuôi', border: OutlineInputBorder())),
               ],
             ),
 
-            // TAB 4: IV. Quan hệ xã hội
+            // TAB 4
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
-                const Text('QUAN HỆ XÃ HỘI (Ghi rõ họ tên, năm sinh, quê quán, nơi ở hiện tại, nghề nghiệp các đối tượng có quan hệ):', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('QUAN HỆ XÃ HỘI:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
-                TextFormField(
-                  controller: _socialRelationsCtl,
-                  maxLines: 12,
-                  decoration: const InputDecoration(
-                    hintText: 'Nhập thông tin các mối quan hệ xã hội phức tạp, bạn bè liên quan...',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextFormField(controller: _socialRelationsCtl, maxLines: 12, decoration: const InputDecoration(border: OutlineInputBorder())),
               ],
             ),
 
-            // TAB 5: V. Quá trình chấp hành án (Đầy đủ 13 mục nhỏ)
+            // TAB 5
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
-                const Text('QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ (13 TIỂU MỤC):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                const Text('QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _ratingsSummaryCtl,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: '1. Xếp loại chấp hành án phạt tù (Tháng 12 đến 11, các Quý I, II, III, IV)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _reducedRecordsCtl,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: '2. Giảm thời hạn tù (Năm, mức giảm, số QĐ, Tòa án, ghi chú)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _temporarySuspensionCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '3. Tạm đình chỉ chấp hành án (Thời gian, vi phạm nếu có)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _conditionalReleaseCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '4. Tha tù trước thời hạn có điều kiện (Thời gian, vi phạm nếu có)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _rewardsCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '5. Khen thưởng (Số QĐ/ngày, nội dung, hình thức)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _disciplinesCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '6. Kỷ luật (Số QĐ/ngày, hành vi vi phạm, hình thức, QĐ tiến bộ)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _solitaryConfinementCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '7. Giam riêng (Số QĐ/ngày, lý do, thời gian, QĐ tiến bộ)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _newCrimeCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '8. Phạm tội mới trong thời gian chấp hành án (Tội danh, mức án)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _probationClassificationCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '9. Phân loại quản chế (Ngày tháng phân loại, nâng/hạ loại)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _extractRecordsCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '10. Trích xuất (Ngày trích xuất, trả trích xuất, lý do, cơ quan)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _transferRecordsCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '11. Chuyển đội, Phân trại hoặc trại khác (Ngày, nơi chuyển, lý do)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _transferEvaluationCtl,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: '12. Nhận xét đánh giá của CB quản giáo trước khi chuyển giao',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _otherInfoCtl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: '13. Thông tin khác',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextFormField(controller: _ratingsSummaryCtl, maxLines: 3, decoration: const InputDecoration(labelText: '1. Xếp loại chấp hành án', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _reducedRecordsCtl, maxLines: 3, decoration: const InputDecoration(labelText: '2. Giảm thời hạn tù', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _temporarySuspensionCtl, maxLines: 2, decoration: const InputDecoration(labelText: '3. Tạm đình chỉ', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _conditionalReleaseCtl, maxLines: 2, decoration: const InputDecoration(labelText: '4. Tha tù trước thời hạn có ĐK', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _rewardsCtl, maxLines: 2, decoration: const InputDecoration(labelText: '5. Khen thưởng', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _disciplinesCtl, maxLines: 2, decoration: const InputDecoration(labelText: '6. Kỷ luật', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _solitaryConfinementCtl, maxLines: 2, decoration: const InputDecoration(labelText: '7. Giam riêng', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _newCrimeCtl, maxLines: 2, decoration: const InputDecoration(labelText: '8. Phạm tội mới trong thời gian chấp hành án', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _probationClassificationCtl, maxLines: 2, decoration: const InputDecoration(labelText: '9. Phân loại quản chế', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _extractRecordsCtl, maxLines: 2, decoration: const InputDecoration(labelText: '10. Trích xuất', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _transferRecordsCtl, maxLines: 2, decoration: const InputDecoration(labelText: '11. Chuyển đội/Phân trại/Trại khác', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _transferEvaluationCtl, maxLines: 3, decoration: const InputDecoration(labelText: '12. Nhận xét của CB quản giáo trước khi chuyển giao', border: OutlineInputBorder())),
+                const SizedBox(height: 8),
+                TextFormField(controller: _otherInfoCtl, maxLines: 2, decoration: const InputDecoration(labelText: '13. Thông tin khác', border: OutlineInputBorder())),
               ],
             ),
 
-            // TAB 6: VI. Cán bộ quản giáo phụ trách
+            // TAB 6
             ListView(
               padding: const EdgeInsets.all(14),
               children: [
                 const Text('VI. CÁN BỘ QUẢN GIÁO PHỤ TRÁCH TỔ, ĐỘI:', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                const Text('Ghi rõ: Cán bộ quản giáo phụ trách (Từ ngày... đến ngày..., Cấp bậc, Họ và tên):', style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
                 const SizedBox(height: 10),
-                TextFormField(
-                  controller: _officersInChargeCtl,
-                  maxLines: 8,
-                  decoration: const InputDecoration(
-                    hintText: 'Ví dụ:\nThiếu tá: Trần Anh Hà (Từ ngày 01/01/2024 đến nay)\nĐại úy: Nguyễn Văn B (Từ 01/06/2022 đến 31/12/2023)...',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                TextFormField(controller: _officersInChargeCtl, maxLines: 8, decoration: const InputDecoration(border: OutlineInputBorder())),
               ],
             ),
           ],
