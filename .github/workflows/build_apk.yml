@@ -22,13 +22,20 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Xay dung du an sach
+      - name: Xay dung du an va nang cap Android SDK
         run: |
           cp lib/main.dart /tmp/main_app.dart
           cd ..
           flutter create --org com.c10.phieutheodoi --project-name phieutheodoi --platforms android build_dir
           cd build_dir
           cp /tmp/main_app.dart lib/main.dart
+          
+          # Nang cap compileSdk va targetSdk len 34 de tuong thich thu vien
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle || true
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle || true
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/' android/app/build.gradle || true
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 34/' android/app/build.gradle || true
+          
           flutter pub add sqflite path intl path_provider share_plus
           flutter pub get
           flutter build apk --release
