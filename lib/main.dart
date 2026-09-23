@@ -154,8 +154,43 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _exportHtmlPrint(Map<String, dynamic> item) async {
-    final buffer = StringBuffer();
-    buffer.write('''
+    final name = (item['full_name'] ?? '').toString().toUpperCase();
+    final shspn = item['shspn'] ?? '';
+    final alias = item['alias_name'] ?? '';
+    final dob = item['dob'] ?? '';
+    final hometown = item['hometown'] ?? '';
+    final residence = item['residence'] ?? '';
+    final cccd = item['cccd'] ?? '';
+    final cccdDate = item['cccd_date'] ?? '';
+    final cccdPlace = item['cccd_place'] ?? '';
+    final ethnicity = item['ethnicity'] ?? 'Kinh';
+    final nationality = item['nationality'] ?? 'Việt Nam';
+    final religion = item['religion'] ?? 'Không';
+    final education = item['education'] ?? '';
+    final crime = item['crime'] ?? '';
+    final arrestDate = item['arrest_date'] ?? '';
+    final sentence = item['sentence'] ?? '';
+    final arrivalDate = item['arrival_date'] ?? '';
+    final judgmentNo = item['judgment_no'] ?? '';
+    final judgmentCourt = item['judgment_court'] ?? '';
+    final detentionTime = item['detention_time'] ?? '';
+    final priorConviction = item['prior_conviction'] ?? 'Không';
+    final priorOffense = item['prior_offense'] ?? 'Không';
+    final drugHistory = item['drug_history'] ?? 'Không';
+    final medicalHistory = item['medical_history'] ?? 'Bình thường';
+    final finePenalty = item['fine_penalty'] ?? '';
+    final fineStatus = item['fine_status'] ?? '';
+    final compensation = item['compensation'] ?? '';
+    final compensationStatus = item['compensation_status'] ?? '';
+    final crimeSummary = item['crime_summary'] ?? 'Đang cập nhật...';
+    final fatherInfo = item['father_info'] ?? '';
+    final motherInfo = item['mother_info'] ?? '';
+    final spouseInfo = item['spouse_info'] ?? '';
+    final childrenInfo = item['children_info'] ?? '';
+    final siblingsInfo = item['siblings_info'] ?? '';
+    final officerNote = item['officer_note'] ?? 'Chấp hành tốt nội quy cơ sở giam giữ.';
+
+    final htmlContent = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -185,53 +220,53 @@ class _HomeScreenState extends State<HomeScreen> {
   </table>
 
   <div class="title">PHIẾU THEO DÕI<br>QUÁ TRÌNH CHẤP HÀNH ÁN PHẠT TÙ CỦA PHẠM NHÂN</div>
-  <div class="center" style="margin-bottom: 20px;">SHSPN: <b>\${item['shspn'] ?? ''}</b></div>
+  <div class="center" style="margin-bottom: 20px;">SHSPN: <b>$shspn</b></div>
 
   <div class="section">I. SƠ LƯỢC LÝ LỊCH:</div>
-  <div>- Họ và tên: <b>\${(item['full_name'] ?? '').toUpperCase()}</b>; Tên gọi khác: \${item['alias_name'] ?? ''}</div>
-  <div>- Ngày sinh: \${item['dob'] ?? ''}; Quê quán: \${item['hometown'] ?? ''}</div>
-  <div>- Nơi thường trú: \${item['residence'] ?? ''}</div>
-  <div>- Số CCCD/CC/Hộ chiếu: \${item['cccd'] ?? ''}; Ngày cấp: \${item['cccd_date'] ?? ''}; Nơi cấp: \${item['cccd_place'] ?? ''}</div>
-  <div>- Dân tộc: \${item['ethnicity'] ?? ''}; Quốc tịch: \${item['nationality'] ?? 'Việt Nam'}; Tôn giáo: \${item['religion'] ?? 'Không'}; Trình độ: \${item['education'] ?? ''}</div>
-  <div>- Tội danh: <b>\${item['crime'] ?? ''}</b></div>
-  <div>- Ngày bắt: \${item['arrest_date'] ?? ''}; Án phạt: <b>\${item['sentence'] ?? ''}</b>; Ngày đến trại: \${item['arrival_date'] ?? ''}</div>
-  <div>- Bản án/QĐ số: \${item['judgment_no'] ?? ''} của TAND \${item['judgment_court'] ?? ''}</div>
-  <div>- Thời gian tạm giữ, tạm giam: \${item['detention_time'] ?? ''}</div>
-  <div>- Tiền án: \${item['prior_conviction'] ?? 'Không'}</div>
-  <div>- Tiền sự: \${item['prior_offense'] ?? 'Không'}</div>
-  <div>- Tiền sử nghiện ma túy: \${item['drug_history'] ?? 'Không'}</div>
-  <div>- Tiền sử bệnh tật: \${item['medical_history'] ?? 'Bình thường'}</div>
-  <div>- Hình phạt tiền: \${item['fine_penalty'] ?? ''} (Tình trạng: \${item['fine_status'] ?? ''})</div>
-  <div>- Bồi thường dân sự: \${item['compensation'] ?? ''} (Tình trạng: \${item['compensation_status'] ?? ''})</div>
+  <div>- Họ và tên: <b>$name</b>; Tên gọi khác: $alias</div>
+  <div>- Ngày sinh: $dob; Quê quán: $hometown</div>
+  <div>- Nơi thường trú: $residence</div>
+  <div>- Số CCCD/CC/Hộ chiếu: $cccd; Ngày cấp: $cccdDate; Nơi cấp: $cccdPlace</div>
+  <div>- Dân tộc: $ethnicity; Quốc tịch: $nationality; Tôn giáo: $religion; Trình độ: $education</div>
+  <div>- Tội danh: <b>$crime</b></div>
+  <div>- Ngày bắt: $arrestDate; Án phạt: <b>$sentence</b>; Ngày đến trại: $arrivalDate</div>
+  <div>- Bản án/QĐ số: $judgmentNo của TAND $judgmentCourt</div>
+  <div>- Thời gian tạm giữ, tạm giam: $detentionTime</div>
+  <div>- Tiền án: $priorConviction</div>
+  <div>- Tiền sự: $priorOffense</div>
+  <div>- Tiền sử nghiện ma túy: $drugHistory</div>
+  <div>- Tiền sử bệnh tật: $medicalHistory</div>
+  <div>- Hình phạt tiền: $finePenalty (Tình trạng: $fineStatus)</div>
+  <div>- Bồi thường dân sự: $compensation (Tình trạng: $compensationStatus)</div>
 
   <div class="section">II. TÓM TẮT HÀNH VI PHẠM TỘI:</div>
-  <div style="text-align: justify;">\${item['crime_summary'] ?? 'Đang cập nhật...'}</div>
+  <div style="text-align: justify;">$crimeSummary</div>
 
   <div class="section">III. QUAN HỆ GIA ĐÌNH:</div>
-  <div>- Bố: \${item['father_info'] ?? ''}</div>
-  <div>- Mẹ: \${item['mother_info'] ?? ''}</div>
-  <div>- Vợ/Chồng: \${item['spouse_info'] ?? ''}</div>
-  <div>- Con cái: \${item['children_info'] ?? ''}</div>
-  <div>- Anh chị em ruột: \${item['siblings_info'] ?? ''}</div>
+  <div>- Bố: $fatherInfo</div>
+  <div>- Mẹ: $motherInfo</div>
+  <div>- Vợ/Chồng: $spouseInfo</div>
+  <div>- Con cái: $childrenInfo</div>
+  <div>- Anh chị em ruột: $siblingsInfo</div>
 
   <div class="section">IV. NHẬN XÉT CỦA CÁN BỘ QUẢN GIÁO:</div>
-  <div style="text-align: justify;">\${item['officer_note'] ?? 'Chấp hành tốt nội quy cơ sở giam giữ.'}</div>
+  <div style="text-align: justify;">$officerNote</div>
 </body>
 </html>
-''');
+''';
 
     try {
       final tempDir = await getTemporaryDirectory();
-      final file = File('\${tempDir.path}/Phieu_PT78BH_\${item['shspn'] ?? item['id']}.html');
-      await file.writeAsString(buffer.toString());
+      final file = File('${tempDir.path}/Phieu_PT78BH_${shspn.isNotEmpty ? shspn : item['id']}.html');
+      await file.writeAsString(htmlContent);
 
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'text/html')],
-        text: 'Phiếu theo dõi phạm nhân \${item['full_name']} (Mở bằng Chrome để In hoặc Lưu PDF)',
+        text: 'Phiếu theo dõi phạm nhân $name (Mở bằng Chrome để In hoặc Lưu PDF)',
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi xuất bản in: \$e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi xuất bản in: $e')));
     }
   }
 
@@ -272,11 +307,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.blueGrey[800],
-                                child: Text('\${index + 1}', style: const TextStyle(color: Colors.white)),
+                                child: Text('${index + 1}', style: const TextStyle(color: Colors.white)),
                               ),
                               title: Text((item['full_name'] ?? '').toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey)),
                               subtitle: Text(
-                                'SHSPN: \${item['shspn'] ?? '-'} | Năm sinh: \${item['dob'] ?? '-'}\nTội danh: \${item['crime'] ?? '-'}\nÁn phạt: \${item['sentence'] ?? '-'}',
+                                'SHSPN: ${item['shspn'] ?? '-'} | Năm sinh: ${item['dob'] ?? '-'}\nTội danh: ${item['crime'] ?? '-'}\nÁn phạt: ${item['sentence'] ?? '-'}',
                                 style: const TextStyle(fontSize: 12),
                               ),
                               trailing: Row(
