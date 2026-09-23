@@ -30,7 +30,6 @@ jobs:
           cd build_dir
           cp /tmp/main_app.dart lib/main.dart
           
-          # Nang cap compileSdk va targetSdk len 34 de tuong thich thu vien
           sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle || true
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle || true
           sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/' android/app/build.gradle || true
@@ -44,5 +43,5 @@ jobs:
       - name: Luu file APK de tai ve
         uses: actions/upload-artifact@v4
         with:
-          name: UngDung_PhieuTheoDoi_PT78BH
+          name: UngDung_PhieuTheoDoi_PT78BH_Full
           path: app-release.apk
